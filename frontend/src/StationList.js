@@ -39,9 +39,9 @@ const StationList = () => {
                 <Table>
                     <thead>
                     <tr>
-                        <th>Stasjon</th>
-                        <th width="25%">Ledige sykler</th>
-                        <th width="25%">Tilgjengelige plasser</th>
+                        <th>Stativ</th>
+                        <th width="30%">Ledige sykler</th>
+                        <th width="30%">Tilgjengelige låser</th>
                     </tr>
                     </thead>
                     <tbody>
