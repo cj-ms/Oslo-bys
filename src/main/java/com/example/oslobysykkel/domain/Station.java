@@ -1,6 +1,7 @@
 package com.example.oslobysykkel.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Station implements Comparable<Station> {

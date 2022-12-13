@@ -12,8 +12,8 @@ public class OsloBysykkelController {
     @Autowired
     private OsloBysykkelService osloBySykkelService;
 
-   @GetMapping("api/stations")
+   @GetMapping(value = "api/stations", produces = "application/json")
     public List<Station> getStationList() {
-       return osloBySykkelService.getStationsInfo();
+       return osloBySykkelService.getStationsData();
     }
 }

@@ -2,9 +2,6 @@ package com.example.oslobysykkel;
 
 import com.example.oslobysykkel.domain.Station;
 import com.example.oslobysykkel.domain.StationInformation;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -21,76 +18,57 @@ public class OsloBysykkelService {
     private final RestTemplate restTemplate;
 
     @Value("${endpoint.information.url}")
-    private String informationUrl;
+    private String stationInformationUrl;
 
     @Value("${endpoint.status.url}")
-    private String statusUrl;
+    private String stationStatusUrl;
 
     @Autowired
     public OsloBysykkelService(RestTemplateBuilder builder) {
         this.restTemplate = builder
                 .build();
     }
-    public List<Station> getStationsInfo() {
-        return getStations();
+    public List<Station> getStationsData() {
+        List<Station> stationStatusList = getStationStatus();
+        List<Station> stationInformationList = getStationInformation();
+        completeStationStatusList(stationStatusList, stationInformationList);
+        return stationStatusList;
     }
 
-    private List<Station> getStations() {
-            ResponseEntity<String> stationInformation = getStationInformation(restTemplate);
-            List<Station> stationStatus = getStationStatus(restTemplate);
-
-            JsonArray jsonStationArray = JsonParser.parseString(
-                            Objects.requireNonNull(stationInformation.getBody())).getAsJsonObject()
-                    .getAsJsonObject("data")
-                    .getAsJsonArray("stations");
-
-
-            for (JsonElement jsonElement:jsonStationArray) {
-                for (Station station:stationStatus) {
-                    if (jsonElement.getAsJsonObject().get("station_id").getAsInt() == station.getStation_id()) {
-                        station.setName(jsonElement.getAsJsonObject().get("name").getAsString());
-                        break;
-                    }
+    public void completeStationStatusList(List<Station> stationStatusList, List<Station> stationInformationList) {
+        for (Station stationInformation: stationInformationList) {
+            for (Station stationStatus: stationStatusList) {
+                if (Objects.equals(stationInformation.getStation_id(), stationStatus.getStation_id())) {
+                    stationStatus.setName(stationInformation.getName());
+                    break;
                 }
             }
-        Collections.sort(stationStatus);
-        return stationStatus;
+        }
+        Collections.sort(stationStatusList);
     }
 
-    private ResponseEntity<String> getStationInformation(RestTemplate restTemplate) {
-        HttpEntity<String> request = getHttpEntity();
-
-       try {
-           return restTemplate.exchange(
-                   informationUrl,
-                   HttpMethod.GET,
-                   request,
-                   String.class
-           );
-       }
-       catch (HttpStatusCodeException e) {
-           System.out.println(e.getResponseBodyAsString());
-           throw e;
-       }
+    public List<Station> getStationInformation() {
+        return executeBysykkelRequest(stationInformationUrl);
+    }
+    public List<Station> getStationStatus() {
+        return executeBysykkelRequest(stationStatusUrl);
     }
 
-    private List<Station> getStationStatus(RestTemplate restTemplate) {
+    private List<Station> executeBysykkelRequest(String url) {
         HttpEntity<String> request = getHttpEntity();
-       try {
-           ResponseEntity<StationInformation> stationNameObject = restTemplate.exchange(
-                   statusUrl,
-                   HttpMethod.GET,
-                   request,
-                   StationInformation.class
-           );
-
-           return Objects.requireNonNull(stationNameObject.getBody()).getData().getStations();
-       }
-       catch (HttpStatusCodeException e) {
-           System.out.println(e.getResponseBodyAsString());
-           throw e;
-       }
-
+        try {
+            ResponseEntity<StationInformation> stationNameObject = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    StationInformation.class
+            );
+            return Objects.requireNonNull(stationNameObject.getBody()).getData().getStations();
+        }
+        catch (HttpStatusCodeException e) {
+            System.out.println(e.getResponseBodyAsString());
+            throw e;
+        }
     }
 
     private HttpEntity<String> getHttpEntity() {
