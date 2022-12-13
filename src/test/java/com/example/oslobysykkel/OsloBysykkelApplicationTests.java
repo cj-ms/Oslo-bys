@@ -47,12 +47,6 @@ class OsloBysykkelApplicationTests {
         ResponseEntity<Station[]> result = restTemplate.getForEntity(uri, Station[].class);
         Assert.assertEquals(200, result.getStatusCodeValue());
         Assert.assertTrue(result.hasBody());
-
-        // Verify list contains Station variables
-      // Assert.assertTrue(Objects.requireNonNull(Arrays.stream(Objects.requireNonNull(result.getBody())).findAny()).isEmpty());
-       /* Assert.assertTrue(result.getBody().contains("name"));
-        Assert.assertTrue(result.getBody().contains("num_bikes_available"));
-        Assert.assertTrue(result.getBody().contains("num_docks_available"));*/
     }
 
     private boolean checkContainsValues(Station station) {
